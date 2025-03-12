@@ -1,0 +1,31 @@
+@keyframes starMovementTop {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes starMovementBottom {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-star-movement-top {
+  animation: starMovementTop 6s linear infinite;
+}
+
+.animate-star-movement-bottom {
+  animation: starMovementBottom 6s linear infinite;
+}
