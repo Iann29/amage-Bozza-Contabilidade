@@ -12,6 +12,24 @@
     --blue-500: #3b82f6;
     --indigo-300: #a5b4fc;
     --violet-200: #ddd6fe;
+    color-scheme: light only;
+  }
+  
+  /* Forçar cores claras mesmo no modo escuro */
+  html {
+    color-scheme: light only;
+  }
+  
+  /* Desabilitar todas as regras de preferência de esquema de cores escuro */
+  @media (prefers-color-scheme: dark) {
+    html {
+      color-scheme: light only;
+    }
+    
+    body {
+      background-color: white;
+      color: inherit;
+    }
   }
 }
 
