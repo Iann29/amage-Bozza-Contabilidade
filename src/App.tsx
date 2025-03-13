@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import Header from './components/Header';
 import QuestionarioPage from './pages/questionario/QuestionarioPage';
+import { initSmoothScroll } from './lib/smoothScroll';
 
 // Página inicial simplificada que será reconstruída
 const HomePage = () => (
@@ -37,6 +39,16 @@ const HomePage = () => (
 );
 
 function App() {
+  // Inicializa o Lenis quando o componente montar
+  useEffect(() => {
+    // Inicializar o Lenis para rolagem suave
+    const lenis = initSmoothScroll();
+    
+    return () => {
+      // Cleanup se necessário no futuro
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-offwhite-pale">
       {/* Header - componente de navegação simplificado */}
