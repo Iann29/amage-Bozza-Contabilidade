@@ -83,10 +83,10 @@ const Hero: React.FC = () => {
     // Iniciar animações quando o componente montar
     controls.start("visible");
 
-    // Alternar as palavras a cada 3 segundos
+    // Alternar as palavras a cada 2 segundos
     const interval = setInterval(() => {
       setPalavraAtual((atual) => (atual + 1) % palavras.length);
-    }, 3000);
+    }, 2000);
 
     // Adicionar um efeito de scroll para mostrar como o Lenis funciona
     const lenis = getLenis();
@@ -139,7 +139,7 @@ const Hero: React.FC = () => {
         type: "spring",
         stiffness: 100,
         damping: 10,
-        delay: 0.7
+        delay: 0.2
       }
     },
     exit: {
@@ -148,7 +148,8 @@ const Hero: React.FC = () => {
       transition: {
         type: "spring",
         stiffness: 100,
-        damping: 10
+        damping: 10,
+        duration: 0.3
       }
     }
   };
@@ -294,12 +295,12 @@ const Hero: React.FC = () => {
                     animate={{ 
                       width: "100%", 
                       opacity: 1,
-                      transition: { delay: 0.2, duration: 0.8 }
+                      transition: { delay: 0.1, duration: 0.4 }
                     }}
                     exit={{ 
                       width: 0, 
                       opacity: 0,
-                      transition: { duration: 0.4 }
+                      transition: { duration: 0.2 }
                     }}
                   />
                 </motion.h1>
@@ -452,12 +453,12 @@ const Hero: React.FC = () => {
       </motion.div>
       
       {/* Ondas decorativas que NÃO são afetadas pelos efeitos de scroll */}
-      <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden z-20" style={{ height: "150px" }}>
+      <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden z-20" style={{ height: "155px" }}>
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
           preserveAspectRatio="none" 
           viewBox="0 0 1440 320" 
-          className="absolute bottom-0 w-full h-full"
+          className="absolute -bottom-1 w-full h-full"
         >
           <path 
             d="M0,256L48,240C96,224,192,192,288,186.7C384,181,480,203,576,224C672,245,768,267,864,266.7C960,267,1056,245,1152,213.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
@@ -466,8 +467,8 @@ const Hero: React.FC = () => {
           />
           <path 
             d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,266.7C672,267,768,245,864,240C960,235,1056,245,1152,234.7C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-            fill="#35c13e"
-            fillOpacity="0.2"
+            fill="#024570"
+            fillOpacity="1"
           />
           <path 
             d="M0,128L48,144C96,160,192,192,288,197.3C384,203,480,181,576,181.3C672,181,768,203,864,213.3C960,224,1056,224,1152,202.7C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"

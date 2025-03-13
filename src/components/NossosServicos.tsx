@@ -201,16 +201,19 @@ const NossosServicos: React.FC = () => {
     <motion.section
       id="servicos"
       ref={sectionRef}
-      className="relative py-24 overflow-hidden"
+      className="relative py-24 overflow-hidden -mt-1"
       initial="visible"
       animate={controls}
       variants={containerVariants}
     >
       {/* Background com a nova cor sólida */}
-      <div className="absolute inset-0 bg-[#80b5b0] z-0"></div>
+      <div className="absolute inset-0 bg-[#03466d] z-0"></div>
+      
+      {/* Elemento de ponte para eliminar qualquer linha branca */}
+      <div className="absolute top-0 -translate-y-[2px] left-0 right-0 h-4 bg-[#03466d] z-10"></div>
       
       {/* Wavey connector do Hero para esta seção */}
-      <div className="absolute top-0 left-0 right-0 w-full overflow-hidden translate-y-[-99%]">
+      <div className="absolute top-0 left-0 right-0 w-full overflow-hidden translate-y-[-105%]">
         <svg 
           viewBox="0 0 1200 120" 
           preserveAspectRatio="none" 
@@ -236,7 +239,7 @@ const NossosServicos: React.FC = () => {
 
       {/* Elementos decorativos circulares animados */}
       <motion.div 
-        className="absolute top-20 right-[5%] w-64 h-64 rounded-full bg-[#03466e] opacity-[0.03] blur-3xl"
+        className="absolute top-32 right-[5%] w-64 h-64 rounded-full bg-[#03466e] opacity-[0.03] blur-3xl"
         variants={decorativeCircleVariants}
         custom={1}
         initial="hidden"
