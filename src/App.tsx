@@ -1,19 +1,15 @@
 import { Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from './components/Header';
+import Hero from './components/Hero';
 import QuestionarioPage from './pages/questionario/QuestionarioPage';
 import { initSmoothScroll } from './lib/smoothScroll';
 
 // Página inicial simplificada que será reconstruída
 const HomePage = () => (
   <div className="min-h-screen bg-offwhite-pale">
-    {/* Espaço para adicionar novos componentes na página inicial */}
-    <section id="inicio" className="h-screen flex items-center justify-center">
-      <div className="max-w-7xl mx-auto px-4 text-center">
-        <h1 className="text-5xl font-bold text-blue-900 mb-6">Bozza Contabilidade</h1>
-        <p className="text-xl text-gray-600">Página inicial em construção</p>
-      </div>
-    </section>
+    {/* Hero section com animações */}
+    <Hero />
     
     {/* Seção de serviços vazia para o link da navegação funcionar */}
     <section id="servicos" className="min-h-screen py-20">

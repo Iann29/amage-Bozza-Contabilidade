@@ -23,6 +23,9 @@ export default {
           '100%': { backgroundPosition: '0% 0%, 0% 0%' },
         },
       },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      },
       colors: {
         border: "rgb(229, 231, 235)",
         background: "rgb(255, 255, 255)",
