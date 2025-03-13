@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation, Variants } from 'framer-motion';
-import { initSmoothScroll, scrollToSection as lenisScrollToSection } from '../lib/smoothScroll';
+import { initSmoothScroll, scrollToSection as lenisScrollToSection, getLenis } from '../lib/smoothScroll';
 
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -108,42 +108,62 @@ const Header: React.FC = () => {
     const lenis = initSmoothScroll();
     
     const handleScroll = () => {
+      // Lógica para detectar se a página foi rolada
       const isScrolled = window.scrollY > 20;
       if (isScrolled !== scrolled) {
         setScrolled(isScrolled);
       }
 
-      // Determinar a seção ativa com base na posição de rolagem
-      const sections = ['inicio', 'servicos', 'sobre', 'contato'];
-      const currentSection = sections.find(section => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 150 && rect.bottom >= 150;
-        }
-        return false;
-      });
+      // Apenas detecta a seção ativa se o menu móvel não estiver aberto
+      if (!isMenuOpen) {
+        // Determinar a seção ativa com base na posição de rolagem
+        const sections = ['inicio', 'servicos', 'sobre', 'contato'];
+        const currentSection = sections.find(section => {
+          const element = document.getElementById(section);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            return rect.top <= 150 && rect.bottom >= 150;
+          }
+          return false;
+        });
 
-      if (currentSection) {
-        setActiveSection(currentSection);
+        if (currentSection) {
+          setActiveSection(currentSection);
+        }
       }
     };
 
     window.addEventListener("scroll", handleScroll);
+    
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [scrolled, controls]);
+  }, [scrolled, controls, isMenuOpen]);
+
+  // Efeito específico para controlar o Lenis quando o menu está aberto/fechado
+  useEffect(() => {
+    const lenis = getLenis();
+    
+    if (isMenuOpen) {
+      // Pausa o Lenis quando o menu está aberto
+      lenis?.stop();
+      // Previne scrolling quando o menu está aberto
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Retoma o Lenis quando o menu está fechado
+      lenis?.start();
+      document.body.style.overflow = 'auto';
+    }
+    
+    return () => {
+      // Garante que o Lenis seja retomado se o componente for desmontado
+      lenis?.start();
+    };
+  }, [isMenuOpen]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    
-    // Previne scrolling quando o menu está aberto
-    if (!isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
+    // Controle de overflow removido daqui, agora está no useEffect
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -151,9 +171,10 @@ const Header: React.FC = () => {
     lenisScrollToSection(sectionId, 100);
     setActiveSection(sectionId);
     
+    // Fecha o menu apenas se for uma ação de clique em um item do menu
     if (isMenuOpen) {
       setIsMenuOpen(false);
-      document.body.style.overflow = 'auto';
+      // Controle de overflow removido daqui, agora está no useEffect
     }
   };
 
@@ -168,10 +189,31 @@ const Header: React.FC = () => {
       initial="hidden"
       animate={controls}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-3 items-center h-24">
-          {/* Navegação à esquerda */}
-          <div className="hidden md:flex items-center justify-start space-x-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="flex items-center justify-between h-24">
+          {/* Logo no canto esquerdo */}
+          <motion.div 
+            className="flex-shrink-0"
+            variants={logoVariants}
+            initial="hidden"
+            animate={controls}
+          >
+            <motion.div
+              className="w-auto inline-block"
+              whileHover={{ scale: 1.05, rotate: 1, transition: { duration: 0.3 } }}
+            >
+              <Link to="/" className="block">
+                <img 
+                  src="/LOGOHEADER (2).png" 
+                  alt="Bozza Contabilidade" 
+                  className="h-16 w-auto filter drop-shadow-lg" 
+                />
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* Navegação centralizada */}
+          <div className="hidden md:flex items-center justify-center space-x-8">
             {['inicio', 'servicos', 'sobre', 'contato'].map((section, index) => (
               <motion.div 
                 key={section} 
@@ -183,11 +225,11 @@ const Header: React.FC = () => {
               >
                 <motion.button 
                   onClick={() => scrollToSection(section)}
-                  className={`text-sm font-medium px-1 py-1 ${
+                  className={`text-base font-medium px-1 py-1 ${
                     activeSection === section 
                       ? "text-blue-600 font-semibold" 
                       : "text-blue-500"
-                  } capitalize`}
+                  } capitalize font-poppins tracking-wide`}
                   whileHover={{ 
                     scale: 1.05, 
                     color: '#2563EB', 
@@ -211,29 +253,8 @@ const Header: React.FC = () => {
             ))}
           </div>
           
-          {/* Logo no centro com animação avançada */}
-          <motion.div 
-            className="flex items-center justify-center"
-            variants={logoVariants}
-            initial="hidden"
-            animate={controls}
-          >
-            <motion.div
-              className="w-auto inline-block"
-              whileHover={{ scale: 1.05, rotate: 1, transition: { duration: 0.3 } }}
-            >
-              <Link to="/" className="block">
-                <img 
-                  src="/LOGOHEADER (2).png" 
-                  alt="Bozza Contabilidade" 
-                  className="h-16 w-auto filter drop-shadow-md" 
-                />
-              </Link>
-            </motion.div>
-          </motion.div>
-          
           {/* Call to Action Button à direita com animação avançada */}
-          <div className="flex justify-end">
+          <div className="flex items-center justify-end">
             <motion.div 
               className="hidden md:block"
               variants={buttonVariants}
@@ -283,54 +304,57 @@ const Header: React.FC = () => {
               </motion.button>
             </motion.div>
             
-            {/* Mobile Menu Button com animação */}
-            <motion.div 
-              className="md:hidden"
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ 
-                delay: 1,
-                type: 'spring', 
-                stiffness: 200 
-              }}
-            >
-              <motion.button
-                className="p-2 rounded-full bg-blue-50/80 text-blue-500"
-                onClick={toggleMenu}
-                aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
-                whileHover={{ 
-                  scale: 1.1, 
-                  backgroundColor: 'rgba(219, 234, 254, 0.9)' 
+            {/* Mobile Menu Button */}
+            {!isMenuOpen && (
+              <motion.div 
+                className="md:hidden ml-4 fixed top-6 right-6 z-[90]"
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ 
+                  delay: 0.5,
+                  type: 'spring', 
+                  stiffness: 200 
                 }}
-                whileTap={{ scale: 0.9 }}
+                style={{ zIndex: 90 }}
               >
-                <div className="w-6 h-6 relative flex items-center justify-center">
-                  <motion.span 
-                    className="absolute w-full h-0.5 bg-current"
-                    animate={{
-                      rotate: isMenuOpen ? 45 : 0,
-                      translateY: isMenuOpen ? 0 : -6,
-                      transition: { duration: 0.3 }
-                    }}
-                  />
-                  <motion.span 
-                    className="absolute w-full h-0.5 bg-current"
-                    animate={{
-                      opacity: isMenuOpen ? 0 : 1,
-                      transition: { duration: 0.3 }
-                    }}
-                  />
-                  <motion.span 
-                    className="absolute w-full h-0.5 bg-current"
-                    animate={{
-                      rotate: isMenuOpen ? -45 : 0,
-                      translateY: isMenuOpen ? 0 : 6,
-                      transition: { duration: 0.3 }
-                    }}
-                  />
-                </div>
-              </motion.button>
-            </motion.div>
+                <motion.button
+                  className="p-2 rounded-full bg-blue-50/80 text-blue-500 shadow-md"
+                  onClick={toggleMenu}
+                  aria-label="Abrir menu"
+                  whileHover={{ 
+                    scale: 1.1, 
+                    backgroundColor: 'rgba(219, 234, 254, 0.9)' 
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <div className="w-6 h-6 relative flex items-center justify-center">
+                    <motion.span 
+                      className="absolute w-full h-0.5 bg-current"
+                      animate={{
+                        rotate: 0,
+                        translateY: -6,
+                        transition: { duration: 0.3 }
+                      }}
+                    />
+                    <motion.span 
+                      className="absolute w-full h-0.5 bg-current"
+                      animate={{
+                        opacity: 1,
+                        transition: { duration: 0.3 }
+                      }}
+                    />
+                    <motion.span 
+                      className="absolute w-full h-0.5 bg-current"
+                      animate={{
+                        rotate: 0,
+                        translateY: 6,
+                        transition: { duration: 0.3 }
+                      }}
+                    />
+                  </div>
+                </motion.button>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
@@ -339,13 +363,49 @@ const Header: React.FC = () => {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
-            className="fixed inset-0 bg-gradient-to-b from-offwhite-pale/98 via-offwhite-warm/98 to-offwhite-pale/98 backdrop-blur-lg z-40 pt-24 px-4"
+            className="fixed inset-0 bg-gradient-to-b from-offwhite-pale/98 via-offwhite-warm/98 to-offwhite-pale/98 backdrop-blur-lg z-[100] pt-24 px-4 overflow-auto"
             variants={mobileMenuVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
+            style={{ 
+              position: 'fixed', 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              bottom: 0,
+              height: '100vh',
+              width: '100vw',
+              maxHeight: '100vh',
+              overflowY: 'auto'
+            }}
           >
-            <div className="flex flex-col space-y-6 items-center justify-center pt-8">
+            {/* Botão X explícito no menu móvel para melhor visibilidade */}
+            <motion.button
+              className="absolute top-6 right-6 p-3 rounded-full bg-white text-blue-500 shadow-lg z-[101]"
+              onClick={toggleMenu}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ 
+                opacity: 1, 
+                scale: 1,
+                transition: { 
+                  delay: 0.2,
+                  type: 'spring',
+                  stiffness: 200
+                }
+              }}
+              whileHover={{ 
+                scale: 1.1, 
+                backgroundColor: 'rgba(255, 255, 255, 0.95)' 
+              }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </motion.button>
+            
+            <div className="flex flex-col space-y-6 items-center justify-center pt-8 min-h-[70vh]">
               {['inicio', 'servicos', 'sobre', 'contato'].map((section, index) => (
                 <motion.button
                   key={section}
