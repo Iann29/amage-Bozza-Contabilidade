@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import Navigation from './components/Navigation';
+import Header from './components/Header';
 import QuestionarioPage from './pages/questionario/QuestionarioPage';
 
 // Página inicial simplificada que será reconstruída
@@ -39,8 +39,8 @@ const HomePage = () => (
 function App() {
   return (
     <div className="min-h-screen bg-offwhite-pale">
-      {/* Navigation - mantido como componente separado */}
-      <Navigation />
+      {/* Header - componente de navegação simplificado */}
+      <Header />
 
       <Routes>
         <Route path="/" element={<HomePage />} />
