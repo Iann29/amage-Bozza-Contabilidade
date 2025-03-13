@@ -6,27 +6,48 @@ let lenis: Lenis | null = null;
 export const initSmoothScroll = () => {
   if (typeof window === 'undefined') return;
   
+  // Desabilita o scroll nativo para evitar conflitos
+  document.documentElement.style.scrollBehavior = 'auto';
+  
   // Inicializa o Lenis se ainda não estiver inicializado
   if (!lenis) {
     lenis = new Lenis({
-      duration: 1.2, // Duração da animação (ajuste para mais lento ou mais rápido)
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Curva de easing
-      wheelMultiplier: 1, // Multiplicador da roda
-      touchMultiplier: 2, // Multiplicador de toque
+      duration: 1.6, // Aumentado para uma sensação mais suave
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Mantém a curva de easing
+      smoothWheel: true, // Garante suavidade no scroll com roda do mouse
+      wheelMultiplier: 0.8, // Reduzido para maior suavidade
+      touchMultiplier: 1.5, // Ajustado para melhor resposta em dispositivos touch
+      syncTouch: true, // Sincroniza o touch para evitar conflitos
+      orientation: 'vertical', // Especifica a orientação explicitamente
+      gestureOrientation: 'vertical', // Especifica a orientação dos gestos
+      lerp: 0.1, // Adiciona um linear interpolation fator para transições mais suaves
     });
 
-    // Função para atualizar o Lenis em cada frame
+    // Otimiza o loop de requestAnimationFrame para melhor performance
     function raf(time: number) {
       lenis?.raf(time);
       requestAnimationFrame(raf);
     }
 
-    // Inicia o loop de animação
+    // Inicia o loop de animação com alta prioridade
     requestAnimationFrame(raf);
     
-    // Opcional: registrar eventos para depuração
-    lenis.on('scroll', () => {
-      // console.log({ scroll, limit, velocity, direction, progress });
+    // Adiciona evento para lidar com atualizações da página que podem afetar o scroll
+    window.addEventListener('resize', () => {
+      lenis?.resize();
+    });
+    
+    // Previne travamentos com lazy loading ou conteúdo dinâmico
+    const observer = new MutationObserver(() => {
+      lenis?.resize();
+    });
+    
+    // Observa mudanças no DOM que podem afetar a altura do conteúdo
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true, 
+      attributes: true,
+      attributeFilter: ['style', 'class']
     });
   }
   
@@ -42,8 +63,8 @@ export const scrollToSection = (sectionId: string, offset: number = 0) => {
     // Usa o Lenis para rolar suavemente
     lenis.scrollTo(targetElement, { 
       offset,
-      duration: 1.2,
-      // Note: a função easing é tratada internamente pelo Lenis
+      duration: 1.6, // Aumentado para combinar com a duração global
+      immediate: false, // Garante que a animação ocorra
     });
   } else {
     // Fallback para navegadores que não suportam o Lenis
@@ -51,6 +72,19 @@ export const scrollToSection = (sectionId: string, offset: number = 0) => {
       top: targetElement.offsetTop - offset,
       behavior: 'smooth'
     });
+  }
+};
+
+// Método para pausar o Lenis temporariamente (útil durante animações pesadas)
+export const pauseLenis = () => {
+  if (lenis) {
+    lenis.stop();
+  }
+};
+
+export const resumeLenis = () => {
+  if (lenis) {
+    lenis.start();
   }
 };
 
