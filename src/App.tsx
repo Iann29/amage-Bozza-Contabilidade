@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
+import NossosServicos from './components/NossosServicos';
 import QuestionarioPage from './pages/questionario/QuestionarioPage';
 import { initSmoothScroll } from './lib/smoothScroll';
 
@@ -11,12 +12,8 @@ const HomePage = () => (
     {/* Hero section com animações */}
     <Hero />
     
-    {/* Seção de serviços vazia para o link da navegação funcionar */}
-    <section id="servicos" className="min-h-screen py-20">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-blue-900 mb-6 text-center">Nossos Serviços</h2>
-      </div>
-    </section>
+    {/* Seção de serviços com o novo componente */}
+    <NossosServicos />
     
     {/* Seção sobre vazia para o link da navegação funcionar */}
     <section id="sobre" className="min-h-screen py-20">
