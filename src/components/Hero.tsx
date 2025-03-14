@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useAnimation, useScroll, useTransform, Variants, AnimatePresence } from 'framer-motion';
+import { motion, useAnimation, useScroll, useTransform, Variants } from 'framer-motion';
 import { getLenis } from '../lib/smoothScroll';
-import SplineViewer from './SplineViewer';
 
 // Componente de contador animado
 const CountUp = ({ end, duration = 2, suffix = '' }: { end: number, duration?: number, suffix?: string }) => {
@@ -57,6 +56,70 @@ const CountUp = ({ end, duration = 2, suffix = '' }: { end: number, duration?: n
   return <span ref={nodeRef}>{count}{suffix}</span>;
 };
 
+// Componente de efeito de digitação
+const TypingEffect = ({ text, className, speed = 40, pauseFor = 2000 }: { 
+  text: string, 
+  className: string, 
+  speed?: number,
+  pauseFor?: number 
+}) => {
+  const [displayText, setDisplayText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
+  
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    
+    // Se o texto atual está completo e não estamos deletando, espere um pouco
+    if (displayText === text && !isDeleting && !isWaiting) {
+      setIsWaiting(true);
+      timer = setTimeout(() => {
+        setIsWaiting(false);
+        setIsDeleting(true);
+      }, pauseFor);
+      return () => clearTimeout(timer);
+    }
+    
+    // Se estamos esperando, não faça nada
+    if (isWaiting) return;
+    
+    // Se estamos deletando e não há mais texto, comece a digitar de novo
+    if (isDeleting && displayText === "") {
+      setIsDeleting(false);
+      return;
+    }
+    
+    // Determine o próximo texto a ser exibido
+    const nextText = isDeleting 
+      ? displayText.substring(0, displayText.length - 1)
+      : text.substring(0, displayText.length + 1);
+    
+    // Configura o timer para atualizar o texto
+    timer = setTimeout(() => {
+      setDisplayText(nextText);
+    }, isDeleting ? speed/2 : speed);
+    
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, isWaiting, text, speed, pauseFor]);
+  
+  return (
+    <div className={className}>
+      <span>{displayText}</span>
+      
+      {/* Linha animada abaixo da palavra */}
+      <motion.div 
+        className="h-0.5 sm:h-1 md:h-1.5 bg-gradient-to-r from-[#35c13e] to-[#024570]/50 rounded-full mt-1 sm:mt-2"
+        initial={{ width: 0, opacity: 0 }}
+        animate={{ 
+          width: "100%", 
+          opacity: 1,
+          transition: { duration: 0.4 }
+        }}
+      />
+    </div>
+  );
+};
+
 const Hero: React.FC = () => {
   const controls = useAnimation();
   const heroRef = useRef<HTMLDivElement>(null);
@@ -67,13 +130,8 @@ const Hero: React.FC = () => {
 
   // Efeitos de parallax usando o progresso de rolagem
   const y1 = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.8], [1, 0.9]);
-  
-  // Menor variação para as ondas
-  const waveScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.98]);
-  const waveOpacity = useTransform(scrollYProgress, [0, 0.9], [1, 0.9]);
 
   // Array de palavras para alternar
   const palavras = ["contabilidade", "consultoria", "assessoria", "planejamento"];
@@ -83,10 +141,10 @@ const Hero: React.FC = () => {
     // Iniciar animações quando o componente montar
     controls.start("visible");
 
-    // Alternar as palavras a cada 2 segundos
+    // Alternar as palavras a cada 6 segundos (tempo suficiente para o efeito de digitação)
     const interval = setInterval(() => {
       setPalavraAtual((atual) => (atual + 1) % palavras.length);
-    }, 2000);
+    }, 6000);
 
     // Adicionar um efeito de scroll para mostrar como o Lenis funciona
     const lenis = getLenis();
@@ -130,56 +188,6 @@ const Hero: React.FC = () => {
     }
   };
 
-  const alternatingTextVariants: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 10,
-        delay: 0.2
-      }
-    },
-    exit: {
-      y: -20,
-      opacity: 0,
-      transition: {
-        type: "spring",
-        stiffness: 100,
-        damping: 10,
-        duration: 0.3
-      }
-    }
-  };
-
-  // Animações para formas decorativas
-  const shapeVariants: Variants = {
-    hidden: { opacity: 0, scale: 0, rotate: -15 },
-    visible: (i) => ({
-      opacity: 0.9,
-      scale: 1,
-      rotate: 0,
-      transition: {
-        type: "spring",
-        stiffness: 50,
-        damping: 10,
-        delay: 0.3 + (i * 0.1)
-      }
-    }),
-    floating: (i) => ({
-      y: [0, -10, 0],
-      rotate: [0, i % 2 === 0 ? 2 : -2, 0],
-      transition: {
-        duration: 4 + (i % 3),
-        repeat: Infinity,
-        repeatType: "reverse",
-        ease: "easeInOut"
-      }
-    })
-  };
-
   // Variantes para estatísticas
   const statsVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
@@ -213,36 +221,6 @@ const Hero: React.FC = () => {
           minHeight: "100vh"
         }}
       >
-        {/* Formas decorativas que flutuam */}
-        <motion.div 
-          className="absolute right-[15%] top-[20%] w-24 h-24 md:w-32 md:h-32 rounded-full bg-[#35c13e]/20 blur-2xl"
-          variants={shapeVariants}
-          custom={1}
-          initial="hidden"
-          animate={["visible", "floating"]}
-        />
-        <motion.div 
-          className="absolute left-[10%] bottom-[25%] w-36 h-36 md:w-48 md:h-48 rounded-full bg-[#024570]/15 blur-xl"
-          variants={shapeVariants}
-          custom={2}
-          initial="hidden"
-          animate={["visible", "floating"]}
-        />
-        <motion.div 
-          className="absolute left-[25%] top-[12%] w-20 h-20 rounded-full bg-[#35c13e]/10 blur-lg"
-          variants={shapeVariants}
-          custom={3}
-          initial="hidden"
-          animate={["visible", "floating"]}
-        />
-        <motion.div 
-          className="absolute right-[30%] bottom-[15%] w-28 h-28 rounded-full bg-blue-400/10 blur-lg"
-          variants={shapeVariants}
-          custom={4}
-          initial="hidden"
-          animate={["visible", "floating"]}
-        />
-
         {/* Padrão geométrico */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0 bg-grid-pattern" style={{
@@ -252,9 +230,9 @@ const Hero: React.FC = () => {
         </div>
         
         {/* Conteúdo principal */}
-        <div className="container mx-auto px-4 sm:px-6 pt-28 pb-20 md:py-32 flex flex-col md:flex-row justify-between items-center relative z-10" style={{ minHeight: "calc(100vh - 100px)" }}>
+        <div className="container mx-auto px-4 sm:px-6 pt-28 pb-20 md:py-32 flex flex-col justify-center items-center relative z-10" style={{ minHeight: "calc(100vh - 100px)" }}>
           {/* Conteúdo de texto */}
-          <div className="w-full max-w-xl md:max-w-2xl md:flex-1 text-center md:text-left mb-2 md:mb-0 mt-6 md:mt-0">
+          <div className="w-full max-w-xl md:max-w-2xl text-center mb-2 md:mb-0 mt-6 md:mt-0">
             
             {/* Tag "Há mais de 50 anos no mercado" */}
             <motion.div
@@ -275,122 +253,108 @@ const Hero: React.FC = () => {
               Soluções em
             </motion.h2>
             
-            {/* Palavras que se alternam com animação */}
+            {/* Palavras que se alternam com animação de digitação */}
             <div className="h-16 sm:h-24 md:h-28 lg:h-32 relative overflow-hidden">
-              <AnimatePresence mode="wait">
-                <motion.h1 
-                  key={palavraAtual}
-                  className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-[#024570] to-[#35c13e] text-transparent bg-clip-text absolute left-0 right-0 text-center md:text-left"
-                  variants={alternatingTextVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                >
-                  {palavras[palavraAtual]}
-                  
-                  {/* Linha animada abaixo da palavra */}
-                  <motion.div 
-                    className="h-0.5 sm:h-1 md:h-1.5 bg-gradient-to-r from-[#35c13e] to-[#024570]/50 rounded-full mt-1 sm:mt-2"
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ 
-                      width: "100%", 
-                      opacity: 1,
-                      transition: { delay: 0.1, duration: 0.4 }
-                    }}
-                    exit={{ 
-                      width: 0, 
-                      opacity: 0,
-                      transition: { duration: 0.2 }
-                    }}
-                  />
-                </motion.h1>
-              </AnimatePresence>
+              <motion.div
+                key={palavraAtual}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="absolute left-0 right-0 text-center"
+              >
+                <TypingEffect
+                  text={palavras[palavraAtual]}
+                  className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-[#024570] to-[#35c13e] text-transparent bg-clip-text"
+                  speed={60}
+                  pauseFor={3000}
+                />
+              </motion.div>
             </div>
             
-            {/* Estatísticas animadas */}
-            <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mt-6 sm:mt-8">
+            {/* Estatísticas animadas - Cards redesenhados e maiores */}
+            <div className="flex flex-col sm:flex-row justify-center gap-6 mt-10 sm:mt-12 w-full max-w-4xl">
               <motion.div 
-                className="bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-md border-l-4 border-[#024570] relative overflow-hidden"
+                className="flex-1 bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-lg border-t-4 border-[#024570] relative overflow-hidden group transition-all duration-300"
                 variants={statsVariants}
                 custom={0}
                 initial="hidden"
                 animate="visible"
                 whileHover={{ 
-                  backgroundColor: "rgba(255, 255, 255, 1)",
-                  boxShadow: "0 8px 20px -5px rgba(2, 69, 112, 0.3)"
+                  boxShadow: "0 15px 30px -10px rgba(2, 69, 112, 0.2)",
+                  borderColor: "#024570",
+                  backgroundColor: "rgba(255, 255, 255, 1)"
                 }}
-                transition={{ duration: 0.1 }}
               >
-                <motion.div 
-                  className="absolute inset-0 bg-gradient-to-r from-[#024570]/10 to-transparent"
-                  initial={{ opacity: 0, x: "-100%" }}
-                  whileHover={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-                <div className="relative z-10">
-                  <div className="text-xl sm:text-2xl font-bold text-[#024570]">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#024570]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="bg-[#024570]/10 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#024570]/15 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#024570] group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-bold text-[#024570] tracking-tight group-hover:scale-105 origin-center transition-transform duration-300">
                     <CountUp end={3500} duration={3} suffix="+" />
                   </div>
-                  <div className="text-sm text-gray-600">empresas atendidas</div>
+                  <div className="text-base sm:text-lg text-gray-600 mt-2 font-medium">empresas atendidas</div>
                 </div>
               </motion.div>
               
               <motion.div 
-                className="bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-md border-l-4 border-[#35c13e] relative overflow-hidden"
+                className="flex-1 bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-lg border-t-4 border-[#35c13e] relative overflow-hidden group transition-all duration-300"
                 variants={statsVariants}
                 custom={1}
                 initial="hidden"
                 animate="visible"
                 whileHover={{ 
-                  backgroundColor: "rgba(255, 255, 255, 1)",
-                  boxShadow: "0 8px 20px -5px rgba(53, 193, 62, 0.3)"
+                  boxShadow: "0 15px 30px -10px rgba(53, 193, 62, 0.2)",
+                  borderColor: "#35c13e",
+                  backgroundColor: "rgba(255, 255, 255, 1)"
                 }}
-                transition={{ duration: 0.1 }}
               >
-                <motion.div 
-                  className="absolute inset-0 bg-gradient-to-r from-[#35c13e]/10 to-transparent" 
-                  initial={{ opacity: 0, x: "-100%" }}
-                  whileHover={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-                <div className="relative z-10">
-                  <div className="text-xl sm:text-2xl font-bold text-[#35c13e]">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#35c13e]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="bg-[#35c13e]/10 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#35c13e]/15 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#35c13e] group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-bold text-[#35c13e] tracking-tight group-hover:scale-105 origin-center transition-transform duration-300">
                     <CountUp end={15} duration={3} suffix="+" />
                   </div>
-                  <div className="text-sm text-gray-600">anos de experiência</div>
+                  <div className="text-base sm:text-lg text-gray-600 mt-2 font-medium">anos de experiência</div>
                 </div>
               </motion.div>
               
               <motion.div 
-                className="bg-white/90 backdrop-blur-sm px-4 py-3 rounded-lg shadow-md border-l-4 border-[#024570] relative overflow-hidden"
+                className="flex-1 bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-lg border-t-4 border-gradient-to-r from-[#024570] to-[#35c13e] relative overflow-hidden group transition-all duration-300"
                 variants={statsVariants}
                 custom={2}
                 initial="hidden"
                 animate="visible"
                 whileHover={{ 
-                  backgroundColor: "rgba(255, 255, 255, 1)",
-                  boxShadow: "0 8px 20px -5px rgba(2, 69, 112, 0.3)"
+                  boxShadow: "0 15px 30px -10px rgba(2, 69, 112, 0.2)",
+                  backgroundColor: "rgba(255, 255, 255, 1)"
                 }}
-                transition={{ duration: 0.1 }}
               >
-                <motion.div 
-                  className="absolute inset-0 bg-gradient-to-r from-[#024570]/10 via-[#35c13e]/10 to-transparent" 
-                  initial={{ opacity: 0, x: "-100%" }}
-                  whileHover={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                />
-                <div className="relative z-10">
-                  <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#024570] to-[#35c13e] text-transparent bg-clip-text">
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#024570]/5 via-[#35c13e]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="bg-gradient-to-r from-[#024570]/10 to-[#35c13e]/10 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:from-[#024570]/15 group-hover:to-[#35c13e]/15 transition-all duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#024570] group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905a3.61 3.61 0 01-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                    </svg>
+                  </div>
+                  <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#024570] to-[#35c13e] text-transparent bg-clip-text tracking-tight group-hover:scale-105 origin-center transition-transform duration-300">
                     <CountUp end={98} duration={3} suffix="%" />
                   </div>
-                  <div className="text-sm text-gray-600">de satisfação dos clientes</div>
+                  <div className="text-base sm:text-lg text-gray-600 mt-2 font-medium">de satisfação dos clientes</div>
                 </div>
               </motion.div>
             </div>
             
             {/* Botão "Solicite uma proposta exclusiva" */}
             <motion.div
-              className="mt-8 text-center md:text-left"
+              className="mt-8 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -418,37 +382,6 @@ const Hero: React.FC = () => {
               </motion.button>
             </motion.div>
           </div>
-
-          {/* Modelo 3D Spline */}
-          <motion.div
-            className="w-[90%] sm:w-[80%] md:w-[45%] lg:w-[40%] h-[380px] sm:h-[380px] md:h-[450px] lg:h-[500px] relative mx-auto md:mx-0 mt-8 md:mt-0"
-            initial={{ opacity: 0, scale: 0.8, rotateY: -20 }}
-            animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-            transition={{ 
-              delay: 1.2, 
-              duration: 1,
-              type: "spring",
-              stiffness: 50
-            }}
-            style={{
-              perspective: '1000px',
-              transformStyle: 'preserve-3d'
-            }}
-          >
-            {/* Efeito de brilho atrás do modelo 3D */}
-            <div className="absolute inset-0 bg-gradient-radial from-[#35c13e]/10 via-transparent to-transparent rounded-full blur-2xl transform scale-110 -z-10"></div>
-            
-            {/* Container do modelo 3D com reflexo */}
-            <div className="w-full h-full relative">
-              <SplineViewer 
-                url="https://prod.spline.design/VsEIjTj5rS3fq5DF/scene.splinecode" 
-                className="w-full h-full z-10"
-              />
-              
-              {/* Reflexo sutil */}
-              <div className="absolute bottom-0 left-0 right-0 h-1/4 bg-gradient-to-t from-[#024570]/5 to-transparent blur-sm -z-10 transform scale-y-[-0.5] opacity-40"></div>
-            </div>
-          </motion.div>
         </div>
       </motion.div>
       
@@ -481,4 +414,4 @@ const Hero: React.FC = () => {
   );
 };
 
-export default Hero; 
+export default Hero;

@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import NossosServicos from './components/NossosServicos';
 import QuestionarioPage from './pages/questionario/QuestionarioPage';
 import { initSmoothScroll } from './lib/smoothScroll';
+import ChatbotMenu from './components/ChatbotMenu';
 
 // Página inicial simplificada que será reconstruída
 const HomePage = () => (
@@ -35,7 +36,7 @@ function App() {
   // Inicializa o Lenis quando o componente montar
   useEffect(() => {
     // Inicializar o Lenis para rolagem suave
-    const lenis = initSmoothScroll();
+    initSmoothScroll();
     
     return () => {
       // Cleanup se necessário no futuro
@@ -51,6 +52,9 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/questionario" element={<QuestionarioPage />} />
       </Routes>
+      
+      {/* Componente de chatbot com menu animado */}
+      <ChatbotMenu />
     </div>
   );
 }

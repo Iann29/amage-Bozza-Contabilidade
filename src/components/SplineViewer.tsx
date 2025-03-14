@@ -28,4 +28,4 @@ const SplineViewer: React.FC<SplineViewerProps> = ({ url, className = '' }) => {
   );
 };
 
-export default SplineViewer; 
+export default SplineViewer;

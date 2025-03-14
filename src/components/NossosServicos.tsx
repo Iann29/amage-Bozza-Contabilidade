@@ -94,6 +94,7 @@ const NossosServicos: React.FC = () => {
     },
     hover: {
       scale: 1.1,
+      rotate: 5,
       transition: {
         type: "spring",
         stiffness: 300,
@@ -138,6 +139,8 @@ const NossosServicos: React.FC = () => {
       title: "Contabilidade Empresarial",
       description: "Serviços contábeis completos para empresas de todos os portes, garantindo conformidade e organização fiscal.",
       color: "#03466e",
+      bgColor: "from-[#03466e] to-[#0961a3]",
+      iconBgColor: "#cfe7ff",
     },
     {
       id: 2,
@@ -149,6 +152,8 @@ const NossosServicos: React.FC = () => {
       title: "Consultoria Fiscal",
       description: "Orientação especializada em impostos e obrigações fiscais para otimizar a carga tributária da sua empresa.",
       color: "#36c03b",
+      bgColor: "from-[#36c03b] to-[#25872a]",
+      iconBgColor: "#e3f9e4",
     },
     {
       id: 3,
@@ -160,6 +165,8 @@ const NossosServicos: React.FC = () => {
       title: "Departamento Pessoal",
       description: "Gestão completa de folha de pagamento, admissões, demissões e todas as rotinas trabalhistas.",
       color: "#03466e",
+      bgColor: "from-[#03466e] to-[#0961a3]",
+      iconBgColor: "#cfe7ff",
     },
     {
       id: 4,
@@ -171,6 +178,8 @@ const NossosServicos: React.FC = () => {
       title: "Abertura de Empresas",
       description: "Assessoria completa na constituição de empresas, desde o registro até a obtenção de todas as licenças necessárias.",
       color: "#36c03b",
+      bgColor: "from-[#36c03b] to-[#25872a]",
+      iconBgColor: "#e3f9e4",
     },
     {
       id: 5,
@@ -183,6 +192,8 @@ const NossosServicos: React.FC = () => {
       title: "Análise Financeira",
       description: "Relatórios financeiros detalhados e análises para tomada de decisões estratégicas em seu negócio.",
       color: "#03466e",
+      bgColor: "from-[#03466e] to-[#0961a3]",
+      iconBgColor: "#cfe7ff",
     },
     {
       id: 6,
@@ -194,6 +205,8 @@ const NossosServicos: React.FC = () => {
       title: "Planejamento Tributário",
       description: "Estratégias personalizadas para reduzir a carga tributária de forma legal e maximizar os resultados da sua empresa.",
       color: "#36c03b",
+      bgColor: "from-[#36c03b] to-[#25872a]",
+      iconBgColor: "#e3f9e4",
     },
   ];
 
@@ -207,7 +220,7 @@ const NossosServicos: React.FC = () => {
       variants={containerVariants}
     >
       {/* Background com a nova cor sólida */}
-      <div className="absolute inset-0 bg-[#03466d] z-0"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#03466d] to-[#033152] z-0"></div>
       
       {/* Elemento de ponte para eliminar qualquer linha branca */}
       <div className="absolute top-0 -translate-y-[2px] left-0 right-0 h-4 bg-[#03466d] z-10"></div>
@@ -270,7 +283,7 @@ const NossosServicos: React.FC = () => {
       {/* Pattern de grid sutil */}
       <div className="absolute inset-0 opacity-[0.02] z-0">
         <div className="h-full w-full" style={{
-          backgroundImage: 'radial-gradient(#03466e 0.5px, transparent 0.5px), radial-gradient(#36c03b 0.5px, transparent 0.5px)',
+          backgroundImage: 'radial-gradient(#ffffff 0.5px, transparent 0.5px), radial-gradient(#36c03b 0.5px, transparent 0.5px)',
           backgroundSize: '20px 20px',
           backgroundPosition: '0 0, 10px 10px'
         }}></div>
@@ -281,7 +294,7 @@ const NossosServicos: React.FC = () => {
         <div className="text-center mb-16">
           <div className="flex flex-col items-center justify-center">
             <motion.div 
-              className="inline-block px-5 py-2 rounded-full bg-white/80 text-[#03466e] text-sm font-medium mb-6"
+              className="inline-block px-5 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-sm font-medium mb-6"
               variants={titleVariants}
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -300,7 +313,7 @@ const NossosServicos: React.FC = () => {
             </motion.h2>
             
             <motion.p 
-              className="text-lg text-white max-w-3xl mx-auto"
+              className="text-lg text-white/80 max-w-3xl mx-auto"
               variants={titleVariants}
             >
               Escolha os serviços que sua empresa precisa para crescer com segurança e conformidade fiscal sem preocupações.
@@ -313,47 +326,60 @@ const NossosServicos: React.FC = () => {
           {services.map((service, index) => (
             <motion.div 
               key={service.id}
-              className="relative bg-white rounded-2xl shadow-lg p-8 overflow-hidden group"
+              className="relative overflow-hidden group"
               variants={cardVariants}
               custom={index}
               whileHover="hover"
               whileTap="tap"
             >
-              {/* Icon container with special styling */}
-              <motion.div 
-                className="w-16 h-16 rounded-2xl mb-6 flex items-center justify-center relative z-10"
-                style={{ color: service.color }}
-                variants={iconContainerVariants}
-                whileHover="hover"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-white to-gray-100 rounded-2xl shadow-md"></div>
-                <div className="relative z-10">{service.icon}</div>
-              </motion.div>
-              
-              {/* Title with gradient underline animation on hover */}
-              <h3 className="text-xl font-bold text-[#03466e] mb-3 relative inline-block">
-                {service.title}
-                <span 
-                  className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-[#03466e] to-[#36c03b] w-0 group-hover:w-full transition-all duration-300"
-                  style={{ transitionDelay: '100ms' }}
-                ></span>
-              </h3>
-              
-              {/* Description text */}
-              <p className="text-[#03466e]/70 leading-relaxed">
-                {service.description}
-              </p>
-              
-              {/* Saiba mais button that appears on hover */}
-              <div className="mt-6">
-                <button 
-                  className="text-[#36c03b] font-medium flex items-center"
-                >
-                  Saiba mais
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </button>
+              {/* Card com gradiente de background */}
+              <div className="relative h-full rounded-3xl overflow-hidden flex flex-col">
+                {/* Topo do card com gradiente */}
+                <div className={`bg-gradient-to-br ${service.bgColor} p-8 pb-10 rounded-t-3xl`}>
+                  {/* Círculos decorativos no background */}
+                  <div className="absolute top-0 left-0 w-32 h-32 rounded-full bg-white/5 -translate-x-1/2 -translate-y-1/2" />
+                  <div className="absolute top-1/4 right-0 w-16 h-16 rounded-full bg-white/5 translate-x-1/2" />
+                  
+                  <div className="relative z-10">
+                    {/* Icon container com fundo claro */}
+                    <motion.div 
+                      className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center`}
+                      style={{ backgroundColor: service.iconBgColor, color: service.color }}
+                      variants={iconContainerVariants}
+                      whileHover="hover"
+                    >
+                      {service.icon}
+                    </motion.div>
+                    
+                    {/* Título sobre fundo escuro */}
+                    <h3 className="text-2xl font-bold text-white mb-2">
+                      {service.title}
+                    </h3>
+                  </div>
+                </div>
+                
+                {/* Parte inferior do card com fundo branco */}
+                <div className="bg-white p-8 pt-6 rounded-b-3xl shadow-lg flex-grow flex flex-col justify-between">
+                  {/* Descrição */}
+                  <p className="text-[#03466e]/80 leading-relaxed mb-6">
+                    {service.description}
+                  </p>
+                  
+                  {/* Botão "Saiba mais" */}
+                  <div className="mt-auto">
+                    <button 
+                      className={`text-sm font-medium py-2.5 px-5 rounded-full bg-gradient-to-r ${service.bgColor} text-white flex items-center justify-center overflow-hidden relative group-hover:shadow-lg transition-all duration-300`}
+                    >
+                      {/* Efeito de brilho no hover */}
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -translate-x-full group-hover:translate-x-full transition-all duration-1000"></span>
+                      
+                      <span className="mr-2">Saiba mais</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
             </motion.div>
           ))}
@@ -365,10 +391,10 @@ const NossosServicos: React.FC = () => {
           variants={titleVariants}
         >
           <motion.button
-            className="relative px-8 py-4 bg-gradient-to-r from-[#03466e] to-[#36c03b] text-white font-semibold rounded-full shadow-lg overflow-hidden group"
+            className="relative px-8 py-4 bg-gradient-to-r from-[#36c03b] to-[#1d8f12] text-white font-semibold rounded-full shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300"
             whileHover={{ 
               scale: 1.05, 
-              boxShadow: "0 10px 30px rgba(3, 70, 110, 0.2)",
+              boxShadow: "0 10px 30px rgba(54, 192, 59, 0.3)",
               transition: { type: "spring", stiffness: 400, damping: 10 }
             }}
             whileTap={{ scale: 0.98 }}
