@@ -5,7 +5,7 @@ import Hero from './components/Hero';
 import NossosServicos from './components/NossosServicos';
 import QuestionarioPage from './pages/questionario/QuestionarioPage';
 import { initSmoothScroll } from './lib/smoothScroll';
-import ChatbotMenu from './components/ChatbotMenu';
+import SplineViewer from './components/SplineViewer';
 
 // Página inicial simplificada que será reconstruída
 const HomePage = () => (
@@ -53,8 +53,14 @@ function App() {
         <Route path="/questionario" element={<QuestionarioPage />} />
       </Routes>
       
-      {/* Componente de chatbot com menu animado */}
-      <ChatbotMenu />
+      {/* Chatbot 3D fixo no canto inferior direito */}
+      <div 
+        className="fixed bottom-4 right-4 z-50 w-24 h-24 cursor-pointer transition-all duration-300 hover:scale-110"
+        title="Clique para abrir o chatbot"
+        onClick={() => alert('Chatbot em desenvolvimento!')}
+      >
+        <SplineViewer url="https://prod.spline.design/VsEIjTj5rS3fq5DF/scene.splinecode" className="w-full h-full" />
+      </div>
     </div>
   );
 }
