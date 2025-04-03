@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation, useScroll, useTransform, Variants } from 'framer-motion';
-import { getLenis } from '../lib/smoothScroll';
 
 // Componente de efeito de digitação
 const TypingEffect = ({ text, className, speed = 40, pauseFor = 2000 }: { 
@@ -92,15 +91,9 @@ const Hero: React.FC = () => {
       setPalavraAtual((atual) => (atual + 1) % palavras.length);
     }, 6000);
 
-    // Adicionar um efeito de scroll para mostrar como o Lenis funciona
-    const lenis = getLenis();
-    
     // Cleanup ao desmontar
     return () => {
       clearInterval(interval);
-      if (lenis) {
-        // Cleanup para Lenis se necessário
-      }
     };
   }, [controls, palavras.length]);
 

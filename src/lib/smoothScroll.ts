@@ -1,4 +1,4 @@
-import Lenis from '@studio-freight/lenis';
+import Lenis from 'lenis';
 
 // Configuração do Lenis para rolagem suave
 let lenis: Lenis | null = null;
@@ -13,7 +13,7 @@ export const initSmoothScroll = () => {
   if (!lenis) {
     lenis = new Lenis({
       duration: 1.6, // Aumentado para uma sensação mais suave
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Mantém a curva de easing
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Mantém a curva de easing
       smoothWheel: true, // Garante suavidade no scroll com roda do mouse
       wheelMultiplier: 0.8, // Reduzido para maior suavidade
       touchMultiplier: 1.5, // Ajustado para melhor resposta em dispositivos touch
@@ -21,6 +21,7 @@ export const initSmoothScroll = () => {
       orientation: 'vertical', // Especifica a orientação explicitamente
       gestureOrientation: 'vertical', // Especifica a orientação dos gestos
       lerp: 0.1, // Adiciona um linear interpolation fator para transições mais suaves
+      autoRaf: false, // Desativa o raf automático para controlar manualmente
     });
 
     // Otimiza o loop de requestAnimationFrame para melhor performance
@@ -37,17 +38,10 @@ export const initSmoothScroll = () => {
       lenis?.resize();
     });
     
-    // Previne travamentos com lazy loading ou conteúdo dinâmico
-    const observer = new MutationObserver(() => {
-      lenis?.resize();
-    });
-    
-    // Observa mudanças no DOM que podem afetar a altura do conteúdo
-    observer.observe(document.body, { 
-      childList: true, 
-      subtree: true, 
-      attributes: true,
-      attributeFilter: ['style', 'class']
+    // Configura o evento de scroll para acessibilidade e debug
+    lenis.on('scroll', (_e: any) => {
+      // Aqui podemos adicionar callback para o evento de scroll, se necessário
+      // O parâmetro foi prefixado com _ para indicar que não é usado
     });
   }
   

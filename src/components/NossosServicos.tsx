@@ -1,19 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation, Variants, AnimatePresence } from 'framer-motion';
-import { getLenis } from '../lib/smoothScroll';
+import { useLenis } from 'lenis/react';
 
 const NossosServicos: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
   const [selectedService, setSelectedService] = useState<number | null>(null);
 
+  // Acesso direto à instância do Lenis através do hook
+  const lenis = useLenis();
+  
   // Função para bloquear o scroll quando o modal estiver aberto
   const toggleBodyScroll = (disable: boolean) => {
-    const lenis = getLenis();
     if (disable) {
+      // Para o scroll quando o modal está aberto
       lenis?.stop();
       document.body.style.overflow = 'hidden';
     } else {
+      // Retoma o scroll quando o modal é fechado
       lenis?.start();
       document.body.style.overflow = '';
     }
@@ -35,12 +39,7 @@ const NossosServicos: React.FC = () => {
     controls.start('visible');
   }, [controls]);
 
-  useEffect(() => {
-    getLenis();
-    return () => {
-      // Cleanup se necessário
-    };
-  }, []);
+  // Não precisamos mais inicializar o Lenis aqui, já está disponível via contexto
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },

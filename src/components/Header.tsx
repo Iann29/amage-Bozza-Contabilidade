@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation, Variants } from 'framer-motion';
-import { initSmoothScroll, scrollToSection as lenisScrollToSection, getLenis } from '../lib/smoothScroll';
+import { useLenis } from 'lenis/react';
 
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('inicio');
+  const [headerVisivel, setHeaderVisivel] = useState(true);
   const controls = useAnimation();
 
   // Variantes de animação para elementos do header
@@ -100,12 +101,45 @@ const Header: React.FC = () => {
     }
   };
 
+  // Acesso à instância do Lenis usando o hook do lenis-react
+  const lenis = useLenis();
+  
+  // Hook para ouvir o evento personalizado que controla a visibilidade do header
   useEffect(() => {
-    // Animação inicial ao carregar a página
-    controls.start('visible');
+    const toggleHeaderVisibility = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('[Header] Received toggleHeader event:', customEvent.detail); // LOG
+      if (customEvent.detail && typeof customEvent.detail.visible === 'boolean') {
+        console.log(`[Header] Setting headerVisivel to: ${customEvent.detail.visible}`); // LOG
+        setHeaderVisivel(customEvent.detail.visible);
+      }
+    };
     
-    // Inicializa o Lenis para rolagem suave
-    const lenis = initSmoothScroll();
+    // Adiciona o listener para o evento personalizado
+    document.addEventListener('toggleHeader', toggleHeaderVisibility);
+    
+    // Limpeza
+    return () => {
+      document.removeEventListener('toggleHeader', toggleHeaderVisibility);
+    };
+  }, []); // O listener do evento não precisa de dependências
+
+  // Novo useEffect para controlar a animação baseada em headerVisivel
+  useEffect(() => {
+    if (headerVisivel) {
+      console.log("[Header] Starting 'visible' animation"); // LOG
+      controls.start("visible");
+    } else {
+      console.log("[Header] Starting 'hidden' animation"); // LOG
+      // Usamos uma variante "instantHidden" para sumir sem animar o Y
+      // Diminuindo a duração para 0.1s
+      controls.start({ opacity: 0, y: 0, transition: { duration: 0.1 } }); 
+    }
+  }, [headerVisivel, controls]); // Reage à mudança de headerVisivel
+
+  useEffect(() => {
+    // Animação inicial ao carregar a página - REMOVIDO DAQUI, controlado pelo useEffect acima
+    // controls.start('visible'); 
     
     const handleScroll = () => {
       // Lógica para detectar se a página foi rolada
@@ -142,8 +176,6 @@ const Header: React.FC = () => {
 
   // Efeito específico para controlar o Lenis quando o menu está aberto/fechado
   useEffect(() => {
-    const lenis = getLenis();
-    
     if (isMenuOpen) {
       // Pausa o Lenis quando o menu está aberto
       lenis?.stop();
@@ -163,19 +195,23 @@ const Header: React.FC = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    // Controle de overflow removido daqui, agora está no useEffect
   };
 
+  // Função que rola suavemente para a seção desejada
   const scrollToSection = (sectionId: string) => {
-    // Usa a função Lenis para rolagem suave
-    lenisScrollToSection(sectionId, 100);
-    setActiveSection(sectionId);
-    
-    // Fecha o menu apenas se for uma ação de clique em um item do menu
+    // Fecha o menu móvel se estiver aberto
     if (isMenuOpen) {
       setIsMenuOpen(false);
-      // Controle de overflow removido daqui, agora está no useEffect
     }
+    
+    // Usa a instância do Lenis para rolar até a seção desejada
+    const targetElement = document.getElementById(sectionId);
+    if (targetElement && lenis) {
+      lenis.scrollTo(targetElement, { offset: 50 });
+    }
+    
+    // Atualiza a seção ativa
+    setActiveSection(sectionId);
   };
 
   return (
