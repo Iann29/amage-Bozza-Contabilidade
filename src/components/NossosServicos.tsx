@@ -1,28 +1,47 @@
-import React, { useEffect, useRef } from 'react';
-import { motion, useAnimation, useInView, Variants } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, useAnimation, Variants, AnimatePresence } from 'framer-motion';
 import { getLenis } from '../lib/smoothScroll';
 
 const NossosServicos: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const isInView = useInView(sectionRef, { once: false, amount: 0.1 });
   const controls = useAnimation();
+  const [selectedService, setSelectedService] = useState<number | null>(null);
 
-  // Efeito para animar quando o componente estiver em visualização
+  // Função para bloquear o scroll quando o modal estiver aberto
+  const toggleBodyScroll = (disable: boolean) => {
+    const lenis = getLenis();
+    if (disable) {
+      lenis?.stop();
+      document.body.style.overflow = 'hidden';
+    } else {
+      lenis?.start();
+      document.body.style.overflow = '';
+    }
+  };
+
+  // Função para abrir o modal
+  const openServiceDetails = (serviceId: number) => {
+    setSelectedService(serviceId);
+    toggleBodyScroll(true);
+  };
+
+  // Função para fechar o modal
+  const closeServiceDetails = () => {
+    setSelectedService(null);
+    toggleBodyScroll(false);
+  };
+
   useEffect(() => {
-    // Iniciar animações imediatamente, sem esperar pelo scroll
     controls.start('visible');
   }, [controls]);
 
-  // Efeito para registrar no Lenis para scroll suave
   useEffect(() => {
-    // Removido o código de pré-carregamento condicional para que o componente apareça imediatamente
-    const lenis = getLenis();
+    getLenis();
     return () => {
       // Cleanup se necessário
     };
   }, []);
 
-  // Variantes para animação
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -127,7 +146,6 @@ const NossosServicos: React.FC = () => {
     })
   };
 
-  // Dados dos serviços
   const services = [
     {
       id: 1,
@@ -141,19 +159,31 @@ const NossosServicos: React.FC = () => {
       color: "#03466e",
       bgColor: "from-[#03466e] to-[#0961a3]",
       iconBgColor: "#cfe7ff",
+      details: [
+        "Elaboração de balancetes mensais",
+        "Demostrativos contábeis",
+        "Análise econômico-financeira",
+        "Conciliação de contas"
+      ]
     },
     {
       id: 2,
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
         </svg>
       ),
-      title: "Consultoria Fiscal",
-      description: "Orientação especializada em impostos e obrigações fiscais para otimizar a carga tributária da sua empresa.",
+      title: "Planejamento tributário",
+      description: "Estratégias personalizadas para reduzir a carga tributária de forma legal e maximizar os resultados da sua empresa.",
       color: "#36c03b",
       bgColor: "from-[#36c03b] to-[#25872a]",
       iconBgColor: "#e3f9e4",
+      details: [
+        "Análise de enquadramento tributário",
+        "Simulação de carga tributária",
+        "Identificação de oportunidades fiscais",
+        "Auditoria preventiva"
+      ]
     },
     {
       id: 3,
@@ -167,19 +197,31 @@ const NossosServicos: React.FC = () => {
       color: "#03466e",
       bgColor: "from-[#03466e] to-[#0961a3]",
       iconBgColor: "#cfe7ff",
+      details: [
+        "Admissão e desligamento",
+        "Folha de pagamento",
+        "e-Social e CAGED",
+        "Controle de férias e afastamentos"
+      ]
     },
     {
       id: 4,
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      title: "Abertura de Empresas",
-      description: "Assessoria completa na constituição de empresas, desde o registro até a obtenção de todas as licenças necessárias.",
+      title: "Consultoria Contábil",
+      description: "Orientação especializada em impostos e obrigações fiscais para otimizar a carga tributária da sua empresa.",
       color: "#36c03b",
       bgColor: "from-[#36c03b] to-[#25872a]",
       iconBgColor: "#e3f9e4",
+      details: [
+        "Análise de viabilidade",
+        "Projeções financeiras",
+        "Consultoria para investimentos",
+        "Relatórios gerenciais"
+      ]
     },
     {
       id: 5,
@@ -189,26 +231,89 @@ const NossosServicos: React.FC = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
         </svg>
       ),
-      title: "Análise Financeira",
+      title: "Escrituração Fiscdal",
       description: "Relatórios financeiros detalhados e análises para tomada de decisões estratégicas em seu negócio.",
       color: "#03466e",
       bgColor: "from-[#03466e] to-[#0961a3]",
       iconBgColor: "#cfe7ff",
+      details: [
+        "Apuração de impostos",
+        "SPED Fiscal e Contribuições",
+        "EFD-REINF",
+        "Obrigações municipais"
+      ]
     },
     {
       id: 6,
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
       ),
-      title: "Planejamento Tributário",
-      description: "Estratégias personalizadas para reduzir a carga tributária de forma legal e maximizar os resultados da sua empresa.",
+      title: "Abertura de empresas",
+      description: "Assessoria completa na constituição de empresas, desde o registro até a obtenção de todas as licenças necessárias.",
       color: "#36c03b",
       bgColor: "from-[#36c03b] to-[#25872a]",
       iconBgColor: "#e3f9e4",
+      details: [
+        "Registro na Junta Comercial",
+        "Inscrições municipais e estaduais",
+        "Alvarás e licenças",
+        "Registro em órgãos de classe"
+      ]
     },
   ];
+
+  // Variantes para o modal
+  const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { duration: 0.3 }
+    },
+    exit: { 
+      opacity: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const modalVariants: Variants = {
+    hidden: { 
+      opacity: 0,
+      scale: 0.8,
+      y: 50
+    },
+    visible: { 
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { 
+        type: "spring",
+        damping: 25,
+        stiffness: 300
+      }
+    },
+    exit: { 
+      opacity: 0,
+      scale: 0.8,
+      y: 50,
+      transition: { 
+        duration: 0.3
+      }
+    }
+  };
+
+  const detailItemVariants: Variants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: (i) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: 0.2 + (i * 0.1),
+        duration: 0.5
+      }
+    })
+  };
 
   return (
     <motion.section
@@ -219,13 +324,10 @@ const NossosServicos: React.FC = () => {
       animate={controls}
       variants={containerVariants}
     >
-      {/* Background com a nova cor sólida */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#03466d] to-[#033152] z-0"></div>
       
-      {/* Elemento de ponte para eliminar qualquer linha branca */}
       <div className="absolute top-0 -translate-y-[2px] left-0 right-0 h-4 bg-[#03466d] z-10"></div>
       
-      {/* Wavey connector do Hero para esta seção */}
       <div className="absolute top-0 left-0 right-0 w-full overflow-hidden translate-y-[-105%]">
         <svg 
           viewBox="0 0 1200 120" 
@@ -250,7 +352,6 @@ const NossosServicos: React.FC = () => {
         </svg>
       </div>
 
-      {/* Elementos decorativos circulares animados */}
       <motion.div 
         className="absolute top-32 right-[5%] w-64 h-64 rounded-full bg-[#03466e] opacity-[0.03] blur-3xl"
         variants={decorativeCircleVariants}
@@ -280,7 +381,6 @@ const NossosServicos: React.FC = () => {
         animate={["visible", "float"]}
       />
 
-      {/* Pattern de grid sutil */}
       <div className="absolute inset-0 opacity-[0.02] z-0">
         <div className="h-full w-full" style={{
           backgroundImage: 'radial-gradient(#ffffff 0.5px, transparent 0.5px), radial-gradient(#36c03b 0.5px, transparent 0.5px)',
@@ -290,7 +390,6 @@ const NossosServicos: React.FC = () => {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Cabeçalho da seção */}
         <div className="text-center mb-16">
           <div className="flex flex-col items-center justify-center">
             <motion.div 
@@ -321,27 +420,23 @@ const NossosServicos: React.FC = () => {
           </div>
         </div>
         
-        {/* Grid de serviços com cards modernos */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
           {services.map((service, index) => (
             <motion.div 
               key={service.id}
-              className="relative overflow-hidden group"
+              className="relative overflow-hidden group cursor-pointer"
               variants={cardVariants}
               custom={index}
               whileHover="hover"
               whileTap="tap"
+              onClick={() => openServiceDetails(service.id)}
             >
-              {/* Card com gradiente de background */}
               <div className="relative h-full rounded-3xl overflow-hidden flex flex-col">
-                {/* Topo do card com gradiente */}
                 <div className={`bg-gradient-to-br ${service.bgColor} p-8 pb-10 rounded-t-3xl`}>
-                  {/* Círculos decorativos no background */}
                   <div className="absolute top-0 left-0 w-32 h-32 rounded-full bg-white/5 -translate-x-1/2 -translate-y-1/2" />
                   <div className="absolute top-1/4 right-0 w-16 h-16 rounded-full bg-white/5 translate-x-1/2" />
                   
                   <div className="relative z-10">
-                    {/* Icon container com fundo claro */}
                     <motion.div 
                       className={`w-16 h-16 rounded-2xl mb-6 flex items-center justify-center`}
                       style={{ backgroundColor: service.iconBgColor, color: service.color }}
@@ -351,26 +446,21 @@ const NossosServicos: React.FC = () => {
                       {service.icon}
                     </motion.div>
                     
-                    {/* Título sobre fundo escuro */}
                     <h3 className="text-2xl font-bold text-white mb-2">
                       {service.title}
                     </h3>
                   </div>
                 </div>
                 
-                {/* Parte inferior do card com fundo branco */}
                 <div className="bg-white p-8 pt-6 rounded-b-3xl shadow-lg flex-grow flex flex-col justify-between">
-                  {/* Descrição */}
                   <p className="text-[#03466e]/80 leading-relaxed mb-6">
                     {service.description}
                   </p>
                   
-                  {/* Botão "Saiba mais" */}
                   <div className="mt-auto">
                     <button 
                       className={`text-sm font-medium py-2.5 px-5 rounded-full bg-gradient-to-r ${service.bgColor} text-white flex items-center justify-center overflow-hidden relative group-hover:shadow-lg transition-all duration-300`}
                     >
-                      {/* Efeito de brilho no hover */}
                       <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -translate-x-full group-hover:translate-x-full transition-all duration-1000"></span>
                       
                       <span className="mr-2">Saiba mais</span>
@@ -385,11 +475,7 @@ const NossosServicos: React.FC = () => {
           ))}
         </div>
         
-        {/* Call to action button */}
-        <motion.div
-          className="mt-16 text-center"
-          variants={titleVariants}
-        >
+        <div className="mt-16 text-center">
           <motion.button
             className="relative px-8 py-4 bg-gradient-to-r from-[#36c03b] to-[#1d8f12] text-white font-semibold rounded-full shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300"
             whileHover={{ 
@@ -399,7 +485,6 @@ const NossosServicos: React.FC = () => {
             }}
             whileTap={{ scale: 0.98 }}
           >
-            {/* Animated light effect on hover */}
             <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -translate-x-full group-hover:translate-x-full transition-all duration-1000"></span>
             
             <span className="flex items-center">
@@ -409,8 +494,138 @@ const NossosServicos: React.FC = () => {
               </svg>
             </span>
           </motion.button>
-        </motion.div>
+        </div>
       </div>
+
+      {/* Modal para exibir detalhes dos serviços */}
+      <AnimatePresence>
+        {selectedService !== null && (
+          <>
+            {/* Overlay semi-transparente */}
+            <motion.div 
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+              variants={overlayVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={closeServiceDetails}
+            />
+            
+            {/* Modal */}
+            <motion.div 
+              className="fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center p-4 z-50 overflow-auto"
+              variants={overlayVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <motion.div
+                className="w-full max-w-3xl mx-auto bg-white rounded-3xl overflow-hidden shadow-2xl"
+                variants={modalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {services.filter(s => s.id === selectedService).map(service => (
+                  <div 
+                    key={service.id} 
+                    className="max-h-[90vh] overflow-auto"
+                  >
+                    {/* Header do Modal */}
+                    <div className={`bg-gradient-to-r ${service.bgColor} p-8 relative overflow-hidden sticky top-0 z-10`}>
+                      {/* Círculos decorativos */}
+                      <div className="absolute top-0 left-0 w-64 h-64 rounded-full bg-white/5 -translate-x-1/3 -translate-y-1/3" />
+                      <div className="absolute bottom-0 right-0 w-48 h-48 rounded-full bg-white/5 translate-x-1/3 translate-y-1/3" />
+                      
+                      <div className="flex flex-col sm:flex-row items-start justify-between relative z-10">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 sm:mb-0 w-full sm:w-auto">
+                          <div 
+                            className={`w-16 h-16 rounded-2xl mb-4 sm:mb-0 sm:mr-6 flex items-center justify-center flex-shrink-0`}
+                            style={{ backgroundColor: service.iconBgColor, color: service.color }}
+                          >
+                            {service.icon}
+                          </div>
+                          
+                          <div className="sm:max-w-md">
+                            <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                              {service.title}
+                            </h2>
+                            <p className="text-white/80 mt-2 text-sm sm:text-base">
+                              {service.description}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Botão fechar */}
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            closeServiceDetails();
+                          }}
+                          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors duration-200 absolute top-0 right-0 sm:static"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Conteúdo com detalhes */}
+                    <div className="p-6 sm:p-8">
+                      <h3 className="text-xl font-semibold text-[#03466e] mb-6">
+                        O que oferecemos:
+                      </h3>
+                      
+                      <ul className="space-y-4">
+                        {service.details.map((detail, i) => (
+                          <motion.li 
+                            key={i}
+                            custom={i}
+                            variants={detailItemVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="flex items-center"
+                          >
+                            <span 
+                              className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 flex-shrink-0`}
+                              style={{ 
+                                backgroundColor: service.color === "#03466e" ? "#03466e" : "#36c03b",
+                                color: "white"
+                              }}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                            <span className="text-gray-700 text-base sm:text-lg">{detail}</span>
+                          </motion.li>
+                        ))}
+                      </ul>
+                      
+                      {/* Botão de ação */}
+                      <div className="mt-10 flex justify-center">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`py-3 px-8 rounded-full bg-gradient-to-r ${service.bgColor} text-white font-medium inline-flex items-center shadow-lg hover:shadow-xl transition-all duration-300`}
+                        >
+                          <span className="mr-2">Solicitar este serviço</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 };

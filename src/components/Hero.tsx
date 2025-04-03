@@ -2,60 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation, useScroll, useTransform, Variants } from 'framer-motion';
 import { getLenis } from '../lib/smoothScroll';
 
-// Componente de contador animado
-const CountUp = ({ end, duration = 2, suffix = '' }: { end: number, duration?: number, suffix?: string }) => {
-  const [count, setCount] = useState(0);
-  const nodeRef = useRef<HTMLSpanElement>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (nodeRef.current) {
-      observer.observe(nodeRef.current);
-    }
-
-    return () => {
-      if (nodeRef.current) observer.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!inView) return;
-
-    let startTime: number;
-    let animationFrame: number;
-    
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
-      const currentCount = Math.floor(progress * end);
-      
-      setCount(currentCount);
-      
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(step);
-      }
-    };
-    
-    animationFrame = requestAnimationFrame(step);
-    
-    return () => {
-      cancelAnimationFrame(animationFrame);
-    };
-  }, [end, duration, inView]);
-
-  return <span ref={nodeRef}>{count}{suffix}</span>;
-};
-
 // Componente de efeito de digitação
 const TypingEffect = ({ text, className, speed = 40, pauseFor = 2000 }: { 
   text: string, 
@@ -183,32 +129,23 @@ const Hero: React.FC = () => {
         type: "spring",
         stiffness: 70,
         damping: 15,
-        delay: 0.3
+        delay: 1.1
       }
     }
-  };
-
-  // Variantes para estatísticas
-  const statsVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 60,
-        damping: 12,
-        delay: 0.8 + (i * 0.2)
-      }
-    })
   };
 
   return (
     <motion.section
       ref={heroRef}
       id="inicio"
-      className="relative w-full overflow-hidden bg-gradient-to-b from-[#f8f9fb] via-[#f1f9ff] to-[#e9f7ff]"
-      style={{ minHeight: "100vh" }}
+      style={{
+        backgroundImage: "url('/imgs/back.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        minHeight: "100vh"
+      }}
+      className="relative w-full overflow-hidden"
       initial="hidden"
       animate={controls}
     >
@@ -246,7 +183,7 @@ const Hero: React.FC = () => {
             
             {/* Título principal "Soluções em" */}
             <motion.h2 
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-[#024570] tracking-wide mb-0 sm:mb-2"
+              className="text-4xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-[#024570] tracking-wide mb-0 sm:mb-2"
               variants={mainTextVariants}
               style={{ y: y1 }}
             >
@@ -254,7 +191,7 @@ const Hero: React.FC = () => {
             </motion.h2>
             
             {/* Palavras que se alternam com animação de digitação */}
-            <div className="h-16 sm:h-24 md:h-28 lg:h-32 relative overflow-hidden">
+            <div className="h-20 sm:h-24 md:h-28 lg:h-32 relative overflow-hidden">
               <motion.div
                 key={palavraAtual}
                 initial={{ opacity: 0 }}
@@ -265,90 +202,10 @@ const Hero: React.FC = () => {
               >
                 <TypingEffect
                   text={palavras[palavraAtual]}
-                  className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-[#024570] to-[#35c13e] text-transparent bg-clip-text"
+                  className="text-5xl sm:text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-[#024570] to-[#35c13e] text-transparent bg-clip-text"
                   speed={60}
                   pauseFor={3000}
                 />
-              </motion.div>
-            </div>
-            
-            {/* Estatísticas animadas - Cards redesenhados e maiores */}
-            <div className="flex flex-col sm:flex-row justify-center gap-6 mt-10 sm:mt-12 w-full max-w-4xl">
-              <motion.div 
-                className="flex-1 bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-lg border-t-4 border-[#024570] relative overflow-hidden group transition-all duration-300"
-                variants={statsVariants}
-                custom={0}
-                initial="hidden"
-                animate="visible"
-                whileHover={{ 
-                  boxShadow: "0 15px 30px -10px rgba(2, 69, 112, 0.2)",
-                  borderColor: "#024570",
-                  backgroundColor: "rgba(255, 255, 255, 1)"
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#024570]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="bg-[#024570]/10 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#024570]/15 transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#024570] group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-bold text-[#024570] tracking-tight group-hover:scale-105 origin-center transition-transform duration-300">
-                    <CountUp end={3500} duration={3} suffix="+" />
-                  </div>
-                  <div className="text-base sm:text-lg text-gray-600 mt-2 font-medium">empresas atendidas</div>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="flex-1 bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-lg border-t-4 border-[#35c13e] relative overflow-hidden group transition-all duration-300"
-                variants={statsVariants}
-                custom={1}
-                initial="hidden"
-                animate="visible"
-                whileHover={{ 
-                  boxShadow: "0 15px 30px -10px rgba(53, 193, 62, 0.2)",
-                  borderColor: "#35c13e",
-                  backgroundColor: "rgba(255, 255, 255, 1)"
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#35c13e]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="bg-[#35c13e]/10 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#35c13e]/15 transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#35c13e] group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-bold text-[#35c13e] tracking-tight group-hover:scale-105 origin-center transition-transform duration-300">
-                    <CountUp end={15} duration={3} suffix="+" />
-                  </div>
-                  <div className="text-base sm:text-lg text-gray-600 mt-2 font-medium">anos de experiência</div>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="flex-1 bg-white/80 backdrop-blur-md p-6 rounded-xl shadow-lg border-t-4 border-gradient-to-r from-[#024570] to-[#35c13e] relative overflow-hidden group transition-all duration-300"
-                variants={statsVariants}
-                custom={2}
-                initial="hidden"
-                animate="visible"
-                whileHover={{ 
-                  boxShadow: "0 15px 30px -10px rgba(2, 69, 112, 0.2)",
-                  backgroundColor: "rgba(255, 255, 255, 1)"
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#024570]/5 via-[#35c13e]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="bg-gradient-to-r from-[#024570]/10 to-[#35c13e]/10 w-16 h-16 rounded-full flex items-center justify-center mb-4 group-hover:from-[#024570]/15 group-hover:to-[#35c13e]/15 transition-all duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-[#024570] group-hover:scale-110 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905a3.61 3.61 0 01-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                    </svg>
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#024570] to-[#35c13e] text-transparent bg-clip-text tracking-tight group-hover:scale-105 origin-center transition-transform duration-300">
-                    <CountUp end={98} duration={3} suffix="%" />
-                  </div>
-                  <div className="text-base sm:text-lg text-gray-600 mt-2 font-medium">de satisfação dos clientes</div>
-                </div>
               </motion.div>
             </div>
             
