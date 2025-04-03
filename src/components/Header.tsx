@@ -130,10 +130,9 @@ const Header: React.FC = () => {
       console.log("[Header] Starting 'visible' animation"); // LOG
       controls.start("visible");
     } else {
-      console.log("[Header] Starting 'hidden' animation"); // LOG
-      // Usamos uma variante "instantHidden" para sumir sem animar o Y
-      // Diminuindo a duração para 0.1s
-      controls.start({ opacity: 0, y: 0, transition: { duration: 0.1 } }); 
+      console.log("[Header] Starting 'hidden' animation (instant)"); // LOG
+      // Usar a variante 'hidden' definida anteriormente, mas forçar duração 0
+      controls.start("hidden", { duration: 0 }); 
     }
   }, [headerVisivel, controls]); // Reage à mudança de headerVisivel
 
@@ -365,7 +364,7 @@ const Header: React.FC = () => {
                 >
                   <div className="w-6 h-6 relative flex items-center justify-center">
                     <motion.span 
-                      className="absolute w-full h-0.5 bg-current"
+                      className="absolute inset-0 w-full h-0.5 bg-current"
                       animate={{
                         rotate: 0,
                         translateY: -6,
@@ -373,14 +372,14 @@ const Header: React.FC = () => {
                       }}
                     />
                     <motion.span 
-                      className="absolute w-full h-0.5 bg-current"
+                      className="absolute inset-0 w-full h-0.5 bg-current"
                       animate={{
                         opacity: 1,
                         transition: { duration: 0.3 }
                       }}
                     />
                     <motion.span 
-                      className="absolute w-full h-0.5 bg-current"
+                      className="absolute inset-0 w-full h-0.5 bg-current"
                       animate={{
                         rotate: 0,
                         translateY: 6,
