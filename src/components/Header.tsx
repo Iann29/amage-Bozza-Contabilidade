@@ -8,6 +8,14 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('inicio');
   const [headerVisivel, setHeaderVisivel] = useState(true);
+  
+  // Função para verificar se estamos na seção de animação
+  const isInAnimationSection = () => {
+    // Retorna true se o scroll estiver na faixa de 1000px a 1800px (valores aproximados da seção da animação)
+    // Esses valores podem precisar de ajustes baseados no layout exato do site
+    const scrollY = window.scrollY;
+    return scrollY > 1000 && scrollY < 1800;
+  };
   const controls = useAnimation();
 
   // Variantes de animação para elementos do header
@@ -104,25 +112,33 @@ const Header: React.FC = () => {
   // Acesso à instância do Lenis usando o hook do lenis-react
   const lenis = useLenis();
   
-  // Hook para ouvir o evento personalizado que controla a visibilidade do header
+  // Hook para verificar diretamente a visibilidade do header com base na posição de scroll
   useEffect(() => {
-    const toggleHeaderVisibility = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      console.log('[Header] Received toggleHeader event:', customEvent.detail); // LOG
-      if (customEvent.detail && typeof customEvent.detail.visible === 'boolean') {
-        console.log(`[Header] Setting headerVisivel to: ${customEvent.detail.visible}`); // LOG
-        setHeaderVisivel(customEvent.detail.visible);
+    const checkHeaderVisibility = () => {
+      const shouldHideHeader = isInAnimationSection();
+      if (shouldHideHeader !== !headerVisivel) {
+        setHeaderVisivel(!shouldHideHeader);
+        console.log(`[Header] Visibilidade alterada para: ${!shouldHideHeader} (scrollY: ${window.scrollY})`);
       }
     };
     
-    // Adiciona o listener para o evento personalizado
-    document.addEventListener('toggleHeader', toggleHeaderVisibility);
+    // Verificar a cada 100ms para garantir estabilidade e evitar problemas de performance
+    checkHeaderVisibility();
+    
+    const scrollHandler = () => {
+      // Debounce simples para melhorar performance
+      if (window.scrollY % 5 === 0) { // Só verifica a cada 5 pixels de scroll
+        checkHeaderVisibility();
+      }
+    };
+    
+    window.addEventListener('scroll', scrollHandler, { passive: true });
     
     // Limpeza
     return () => {
-      document.removeEventListener('toggleHeader', toggleHeaderVisibility);
+      window.removeEventListener('scroll', scrollHandler);
     };
-  }, []); // O listener do evento não precisa de dependências
+  }, [headerVisivel]);
 
   // Novo useEffect para controlar a animação baseada em headerVisivel
   useEffect(() => {
